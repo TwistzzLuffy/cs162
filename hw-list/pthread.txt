@@ -1,0 +1,11 @@
+1.Is the program’s output the same each time it is run? Why or why not?
+Answer : No. because i think that每一时刻程序运行时，系统所处于的状态也在变化，导致分配的内存也发生变化。
+2.Based on the program’s output, do multiple threads share the same stack?
+我认为他们没有共享同一个stack,每次创建的线程地址相差4kb.
+3.Based on the program’s output, do multiple threads have separate copies of global variables?
+对于全局变量他们之间是共享的，可以从common的累加看出来
+4.Based on the program’s output, what is the value of void *threadid? How does this relate to the variable’s type (void *)?
+在pthread_create中传递过去
+5.Using the first command line argument, create a large number of threads in pthread. Do all threads run before the program exits? Why or why not?
+会的，知道所有线程运行完才会退出。。原因？因为都在一个for
+

@@ -22,6 +22,7 @@
  */
 
 #ifndef WORD_COUNT_H
+#define PTHREADS
 #define WORD_COUNT_H
 
 #include <stdbool.h>
