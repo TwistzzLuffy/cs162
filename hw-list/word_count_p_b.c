@@ -30,9 +30,8 @@
 
 #include "word_count.h"
 
-void init_words(word_count_list_t* wclist) {
-  list_init(&wclist->lst);
-
+void init_words(word_count_list_t* wclist) { /* TODO */
+  init_words(wclist);
   pthread_mutexattr_t attr;
   pthread_mutexattr_init(&attr);
   pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE_NP);
@@ -40,36 +39,33 @@ void init_words(word_count_list_t* wclist) {
 }
 
 size_t len_words(word_count_list_t* wclist) {
-  /* Critical section. */
+  /* TODO */
   pthread_mutex_lock(&wclist->lock);
-  size_t len = 0;
-  struct list_elem* begin = list_begin(&wclist->lst);
-  struct list_elem* end = list_end(&wclist->lst);
-  for (struct list_elem* e = begin; e != end; e = list_next(e)) {
-    len++;
-  }
+  size_t len = 0;// i think there are needed a lock 
+  struct list_elem *e;
+  for(e = list_begin(wclist); e != list_end(wclist); e = list_next(e)){
+    len += 1;
+  } 
   pthread_mutex_unlock(&wclist->lock);
-
   return len;
 }
 
 word_count_t* find_word(word_count_list_t* wclist, char* word) {
+  /* TODO */
+  struct list_elem *e;
+  //there are needed a lock to protect the next(e);
   pthread_mutex_lock(&wclist->lock);
-  word_count_t* res = NULL;
-  struct list_elem* begin = list_begin(&wclist->lst);
-  struct list_elem* end = list_end(&wclist->lst);
-  for (struct list_elem* e = begin; e != end; e = list_next(e)) {
-    word_count_t* wc = list_entry(e, word_count_t, elem);
-    char* store_word = wc->word;
-    if (strcmp(store_word, word) == 0) {
-      res = wc;
-      break;
+  for(e = list_begin(wclist); e != list_end(wclist); e = list_next(e)){
+    word_count_t *w = list_entry(e, struct word_count, elem);
+    if(strcmp(word, w->word) == 0){
+      pthread_mutex_unlock(&wclist->lock);
+      return w;
     }
   }
-
   pthread_mutex_unlock(&wclist->lock);
-  return res;
+  return NULL;
 }
+
 
 word_count_t* add_word(word_count_list_t* wclist, char* word) {
   pthread_mutex_lock(&wclist->lock);
@@ -89,23 +85,24 @@ word_count_t* add_word(word_count_list_t* wclist, char* word) {
   return word_entry;
 }
 
-void fprint_words(word_count_list_t* wclist, FILE* outfile) {
-  struct list_elem* begin = list_begin(&wclist->lst);
-  struct list_elem* end = list_end(&wclist->lst);
-  for (struct list_elem* e = begin; e != end; e = list_next(e)) {
-    word_count_t* wc = list_entry(e, word_count_t, elem);
-    fprintf(outfile, "       %d\t%s\n", wc->count, wc->word);
-  }
+void fprint_words(word_count_list_t* wclist, FILE* outfile) { /* TODO */
+    struct list_elem *e;
+    for(e = list_begin(wclist); e != list_end(wclist); e = list_next(e)){
+      struct word_count *w = list_entry(e, struct word_count, elem);
+      fprintf(outfile, "%8d\t%s\n", w->count, w->word);
+    }
 }
+static bool less_list(const struct list_elem* ewc1, const struct list_elem* ewc2, void* aux) {
+  /* TODO */
+  bool (*less)(const word_count_t*, const word_count_t*) = aux;
+  word_count_t *w1 = list_entry(ewc1, struct word_count, elem);
+  word_count_t *w2 = list_entry(ewc2, struct word_count, elem);
 
-static bool less_list(const struct list_elem* ewc1,
-                      const struct list_elem* ewc2, void* aux) {
-  word_count_t* wc1 = list_entry(ewc1, word_count_t, elem);
-  word_count_t* wc2 = list_entry(ewc2, word_count_t, elem);
-  return ((bool (*)(const word_count_t*, const word_count_t*))aux)(wc1, wc2);
+  return less(w1, w2);
 }
 
 void wordcount_sort(word_count_list_t* wclist,
                     bool less(const word_count_t*, const word_count_t*)) {
-  list_sort(&wclist->lst, less_list, less);
+  /* TODO */
+  list_sort(wclist, less_list, less);
 }
