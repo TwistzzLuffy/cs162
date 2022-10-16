@@ -15,7 +15,7 @@
 
 /* Convenience macro to silence compiler warnings about unused function parameters. */
 #define unused __attribute__((unused))
-
+#define MAXARGV 128
 
 /* Whether the shell is connected to an actual terminal or not. */
 bool shell_is_interactive;
@@ -123,7 +123,30 @@ int main(unused int argc, unused char* argv[]) {
       cmd_table[fundex].fun(tokens);
     } else {
       /* REPLACE this to run commands as programs. */
-      fprintf(stdout, "This shell doesn't know how to run programs.\n");
+      int pid = fork();
+      if(pid < 0){
+        printf("fork is error");
+        exit(1);
+      }else if (pid == 0)
+      {
+        /* code */
+        int length = tokens_get_length(tokens);
+        char** argv = (char**)malloc((8+1)*length);
+        int i = 0;
+        for(; i < length; i++){
+          argv[i] = (char*)malloc(MAXARGV);
+          strcpy(argv[i], tokens_get_token(tokens, i));
+        }
+        argv[i] = NULL;
+        
+        // printf("char** : %d the tokens length: %d\n", sizeof(char**),tokens_get_length(tokens));
+        execv(tokens_get_token(tokens, 0), argv);
+        // execv(tokens_get_token(tokens,0),tokens_get_token(tokens,1));
+      }else{
+        int status;
+        wait(&status);
+        fprintf(stdout,"the program success");
+      }
     }
 
     if (shell_is_interactive)
