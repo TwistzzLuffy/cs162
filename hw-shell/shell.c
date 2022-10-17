@@ -102,6 +102,34 @@ void init_shell() {
   }
 }
 
+/* resolve the path */
+char* resolve_path(char* program_name){
+    if (access(program_name, F_OK) == 0) {
+    return program_name;
+  }
+  char* path_dir = malloc(1048);
+  strcpy(path_dir, getenv("PATH"));
+  printf("program_dir : %s\n", path_dir);
+  if(path_dir == NULL){
+    return NULL;
+  }
+  char* token = strtok(path_dir,":");
+  char* program_path = malloc(128);
+  while(token != NULL){
+    strcpy(program_path, token);
+    strcat(program_path, "/");
+    strcat(program_path, program_name);
+    if(access(program_path, F_OK) == 0){
+      printf("program_path : %s\n", program_path);
+      free(path_dir);
+      return program_path;
+    }
+    token = strtok(NULL, ":");
+  }
+  free(path_dir);
+  return NULL;
+}
+
 int main(unused int argc, unused char* argv[]) {
   init_shell();
 
@@ -140,12 +168,11 @@ int main(unused int argc, unused char* argv[]) {
         argv[i] = NULL;
         
         // printf("char** : %d the tokens length: %d\n", sizeof(char**),tokens_get_length(tokens));
-        execv(tokens_get_token(tokens, 0), argv);
+        execv(resolve_path(tokens_get_token(tokens, 0)), argv);
         // execv(tokens_get_token(tokens,0),tokens_get_token(tokens,1));
       }else{
         int status;
         wait(&status);
-        fprintf(stdout,"the program success");
       }
     }
 
